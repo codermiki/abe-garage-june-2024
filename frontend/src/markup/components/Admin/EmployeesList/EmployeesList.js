@@ -1,0 +1,136 @@
+// Import the necessary components
+import React, { useState, useEffect } from "react";
+import { FaEdit } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { Table, Button } from "react-bootstrap";
+import { useAuth } from "../../../../Contexts/AuthContext";
+import { format } from "date-fns";
+import employeeService from "../../../../services/employee.service";
+import { Link } from "react-router-dom";
+
+const EmployeesList = () => {
+   const [employees, setEmployees] = useState([]);
+   const [apiError, setApiError] = useState(false);
+   const [apiErrorMessage, setApiErrorMessage] = useState(null);
+   const { employee } = useAuth();
+   let token = employee ? employee.employee_token : null;
+
+   useEffect(() => {
+      fetchEmployees();
+   }, []);
+
+   const fetchEmployees = () => {
+      employeeService
+         .getAllEmployees(token)
+         .then((res) => {
+            if (!res.ok) {
+               setApiError(true);
+               setApiErrorMessage(
+                  res.status === 401
+                     ? "Please login again"
+                     : res.status === 403
+                     ? "You are not authorized to view this page"
+                     : "Please try again later"
+               );
+            }
+            return res.json();
+         })
+         .then((data) => {
+            if (data.data.length !== 0) {
+               setEmployees(data.data);
+            }
+         })
+         .catch(() => setApiErrorMessage("Error fetching employees"));
+   };
+
+   const handleDelete = (id) => {
+      if (window.confirm("Are you sure you want to delete this employee?")) {
+         employeeService
+            .deleteEmployee(id, token)
+            .then((res) => {
+               if (!res.ok) {
+                  alert("Failed to delete employee");
+               }
+               setEmployees(employees.filter((emp) => emp.employee_id !== id));
+            })
+            .catch(() => alert("Error deleting employee"));
+      }
+   };
+
+   return (
+      <>
+         {apiError ? (
+            <section className="contact-section">
+               <div className="auto-container">
+                  <div className="contact-title">
+                     <h2>{apiErrorMessage}</h2>
+                  </div>
+               </div>
+            </section>
+         ) : (
+            <section className="contact-section">
+               <div className="auto-container">
+                  <div className="contact-title">
+                     <h2>Employees</h2>
+                  </div>
+                  {/* Employee List */}
+                  <Table striped bordered hover>
+                     <thead>
+                        <tr>
+                           <th>Active</th>
+                           <th>First Name</th>
+                           <th>Last Name</th>
+                           <th>Email</th>
+                           <th>Phone</th>
+                           <th>Added Date</th>
+                           <th>Role</th>
+                           <th>Edit/Delete</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {employees.map((employee) => (
+                           <tr key={employee.employee_id}>
+                              <td>{employee.active_employee ? "Yes" : "No"}</td>
+                              <td>{employee.employee_first_name}</td>
+                              <td>{employee.employee_last_name}</td>
+                              <td>{employee.employee_email}</td>
+                              <td>{employee.employee_phone}</td>
+                              <td>
+                                 {format(
+                                    new Date(employee.added_date),
+                                    "MM-dd-yyyy | HH:mm"
+                                 )}
+                              </td>
+                              <td>{employee.company_role_name}</td>
+                              <td>
+                                 <div className="edit-delete-icons">
+                                    <Link
+                                       to={`/admin/employees/edit/${employee.employee_id}`}
+                                       className="m-2"
+                                    >
+                                       <FaEdit />
+                                    </Link>
+
+                                    <Button
+                                       variant="danger"
+                                       size="sm"
+                                       onClick={() =>
+                                          handleDelete(employee.employee_id)
+                                       }
+                                    >
+                                       <MdDelete />
+                                    </Button>
+                                 </div>
+                              </td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </Table>
+               </div>
+            </section>
+         )}
+      </>
+   );
+};
+
+export default EmployeesList;

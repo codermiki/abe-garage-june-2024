@@ -1,0 +1,30 @@
+.sidebar-circle {
+   width: 80px;
+   height: 80px;
+   background-color: red;
+   color: white;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: bold;
+   font-size: 18px;
+   transition: all 0.3s ease;
+}
+.sidebar-circle:hover {
+   background-color: darkred;
+   cursor: pointer;
+}
+.sidebar-line {
+   width: 2px;
+   /* make the height auto fit container  */
+   height: 100px;
+
+   background-color: red;
+   transition: all 0.3s ease;
+}
+
+.sidebar-line:hover {
+   background-color: darkred;
+   cursor: pointer;
+}
