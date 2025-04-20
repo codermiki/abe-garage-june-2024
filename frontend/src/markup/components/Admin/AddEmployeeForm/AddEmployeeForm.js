@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import employeeService from "../../../../services/employee.service";
 // Import the useAuth hook
 import { useAuth } from "../../../../Contexts/AuthContext";
+import { useNavigate } from "react-router";
 
-function AddEmployeeForm(props) {
+function AddEmployeeForm() {
+   const navigate = useNavigate();
    const [employee_email, setEmail] = useState("");
    const [employee_first_name, setFirstName] = useState("");
    const [employee_last_name, setLastName] = useState("");
@@ -91,8 +93,7 @@ function AddEmployeeForm(props) {
                setSuccess(true);
                setServerError("");
                // Redirect to the employees page
-
-               window.location.href = "/admin/employees";
+               navigate("/admin/employees", { replace: true });
             }
          })
          // Handle Catch

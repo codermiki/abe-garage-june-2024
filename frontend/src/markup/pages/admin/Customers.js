@@ -2,6 +2,7 @@ import React from "react";
 import CustomersList from "../../components/Admin/CustomerList/CustomerList";
 import AdminMenu from "../../components/Admin/AdminMenu/AdminMenu";
 const Customers = () => {
+   
    return (
       <>
          <div>

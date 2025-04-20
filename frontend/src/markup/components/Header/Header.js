@@ -8,7 +8,7 @@ import loginService from "../../../services/login.service";
 // Import the custom context hook
 import { useAuth } from "../../../Contexts/AuthContext";
 
-function Header(props) {
+function Header() {
    // Use the custom hook to access the data in the context
    const { isLogged, setIsLogged, employee, isAdmin } = useAuth();
    // console.log(useAuth());

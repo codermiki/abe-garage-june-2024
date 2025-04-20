@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import customerService from "../../../../services/customer.service";
 // Import the useAuth hook
 import { useAuth } from "../../../../Contexts/AuthContext";
+import { useNavigate } from "react-router";
 
-function AddCustomerForm(props) {
+function AddCustomerForm() {
+   const navigate = useNavigate();
    const [customer_email, setEmail] = useState("");
    const [customer_first_name, setFirstName] = useState("");
    const [customer_last_name, setLastName] = useState("");
@@ -87,7 +89,7 @@ function AddCustomerForm(props) {
                setSuccess(true);
                setServerError("");
                // Redirect to the employees page
-               window.location.href = "/admin/customers";
+               navigate("/admin/customers", { replace: true });
             }
          })
          .catch((error) => {

@@ -6,9 +6,10 @@ import { Table, Button } from "react-bootstrap";
 import { useAuth } from "../../../../Contexts/AuthContext";
 import { format } from "date-fns";
 import employeeService from "../../../../services/employee.service";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const EmployeesList = () => {
+   const location = useLocation();
    const [employees, setEmployees] = useState([]);
    const [apiError, setApiError] = useState(false);
    const [apiErrorMessage, setApiErrorMessage] = useState(null);
@@ -106,6 +107,7 @@ const EmployeesList = () => {
                                  <div className="edit-delete-icons">
                                     <Link
                                        to={`/admin/employees/edit/${employee.employee_id}`}
+                                       state={{ from: location.pathname }}
                                        className="m-2"
                                     >
                                        <FaEdit />

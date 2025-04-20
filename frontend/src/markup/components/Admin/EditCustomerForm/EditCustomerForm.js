@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import customerService from "../../../../services/customer.service";
 import { useAuth } from "../../../../Contexts/AuthContext";
 
-function EditCustomerForm() {
+function EditCustomerForm({ from }) {
+   const navigate = useNavigate();
+
    const { id } = useParams(); // Get the customer ID from the route params
    const [customer_id, setCustomerId] = useState("");
    const [customer_email, setEmail] = useState("");
@@ -98,7 +100,7 @@ function EditCustomerForm() {
             } else {
                setSuccess(true);
                setServerError("");
-               window.location.href = "/admin/customers";
+               navigate(from, { replace: true });
             }
          })
          .catch((error) => {

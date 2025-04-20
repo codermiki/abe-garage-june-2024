@@ -1,8 +1,11 @@
 import React from "react";
 import AdminMenu from "../../components/Admin/AdminMenu/AdminMenu";
 import EditCustomerForm from "../../components/Admin/EditCustomerForm/EditCustomerForm";
+import { useLocation, useNavigate } from "react-router";
 
 function EditCustomer() {
+   const location = useLocation();
+   const from = location?.state?.from || "/";
    return (
       <div>
          <div className="container-fluid admin-pages">
@@ -25,7 +28,7 @@ function EditCustomer() {
                   }}
                   className="col-md-10 admin-right-side"
                >
-                  <EditCustomerForm />
+                  <EditCustomerForm from={from} />
                </div>
             </div>
          </div>

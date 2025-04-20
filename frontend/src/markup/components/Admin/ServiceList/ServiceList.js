@@ -241,6 +241,7 @@ function ServiceList() {
                      ></div>
                   </div>
                )}
+
                <div className="auto-container">
                   <div className="contact-title">
                      <h2>Add a new Service</h2>

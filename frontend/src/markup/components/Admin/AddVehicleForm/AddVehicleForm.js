@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { FaWindowClose } from "react-icons/fa";
+import vehicleService from "../../../../services/vehicle.service";
+import { useAuth } from "../../../../Contexts/AuthContext";
 
-function AddVehicleForm() {
-   const [customer_id, setCustomerId] = useState("");
+function AddVehicleForm({ cust_id, setAddFormDisplay, setFetchController }) {
+   const { employee } = useAuth();
+   const token = employee?.employee_token;
+   const [customer_id, setCustomerId] = useState(cust_id);
    const [vehicle_year, setVehicleYear] = useState("");
    const [vehicle_make, setVehicleMake] = useState("");
    const [vehicle_model, setVehicleModel] = useState("");
@@ -16,7 +21,7 @@ function AddVehicleForm() {
       event.preventDefault();
 
       const vehicleData = {
-         customer_id: parseInt(customer_id),
+         customer_id: cust_id,
          vehicle_year: parseInt(vehicle_year),
          vehicle_make,
          vehicle_model,
@@ -28,20 +33,12 @@ function AddVehicleForm() {
       };
 
       try {
-         const response = await fetch("http://localhost:8080/api/vehicle", {
-            method: "POST",
-            headers: {
-               "Content-Type": "application/json",
-               
-            },
-            body: JSON.stringify(vehicleData),
-         });
-
+         const response = await vehicleService.addVehicle(vehicleData, token);
          if (!response.ok) {
             throw new Error("Failed to add vehicle");
          }
-
-         alert("Vehicle added successfully!");
+         setFetchController((prev) => !prev);
+         setAddFormDisplay((prev) => !prev);
       } catch (err) {
          setError(err.message);
       }
@@ -49,7 +46,18 @@ function AddVehicleForm() {
 
    return (
       <div>
-         <div className="bg-white shadow-sm p-3 mb-3 rounded width-100">
+         <div className="bg-white shadow-sm p-3 mb-3 rounded width-100 position-relative">
+            <FaWindowClose
+               size={20}
+               style={{
+                  cursor: "pointer",
+                  color: "red",
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+               }}
+               onClick={() => setAddFormDisplay((prev) => !prev)}
+            />
             <div className="row clearfix">
                <div className="form-column col-lg-7">
                   <div className="inner-column">

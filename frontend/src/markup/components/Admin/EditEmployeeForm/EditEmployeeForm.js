@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import employeeService from "../../../../services/employee.service";
 import { useAuth } from "../../../../Contexts/AuthContext";
 
-function EditEmployeeForm() {
+function EditEmployeeForm({ from }) {
+   const navigate = useNavigate();
    const { id } = useParams(); // Get the employee ID from the route params
    const [employee_id, setEmployeeId] = useState("");
    const [employee_first_name, setFirstName] = useState("");
@@ -84,7 +85,7 @@ function EditEmployeeForm() {
             } else {
                setSuccess(true);
                setServerError("");
-               window.location.href = "/admin/employees";
+               navigate(from, { replace: true }); // Redirect to the employees list page
             }
          })
          .catch((error) => {

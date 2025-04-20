@@ -8,10 +8,11 @@ import { useAuth } from "../../../../Contexts/AuthContext";
 import { format } from "date-fns"; // To properly format the date on the table
 // Import the customer service
 import customerService from "../../../../services/customer.service";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 // Create the CustomersList component
 const CustomersList = () => {
+   const location = useLocation();
    // Create all the states we need to store the data
    const [customers, setCustomers] = useState([]);
    const [apiError, setApiError] = useState(false);
@@ -109,6 +110,7 @@ const CustomersList = () => {
                                  <div className="edit-delete-icons">
                                     <Link
                                        to={`/admin/customers/edit/${customer.customer_id}`}
+                                       state={{ from: location.pathname }}
                                     >
                                        <FaEdit />
                                     </Link>
