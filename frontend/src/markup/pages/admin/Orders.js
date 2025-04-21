@@ -1,5 +1,6 @@
 import React from "react";
 import AdminMenu from "../../components/Admin/AdminMenu/AdminMenu";
+import OrdersList from "../../components/Admin/OrdersList/OrdersList";
 
 const Orders = () => {
    return (
@@ -25,7 +26,7 @@ const Orders = () => {
                      }}
                      className="col-md-10 admin-right-side"
                   >
-                     <div className="text-center">Orders page</div>
+                     <OrdersList />
                   </div>
                </div>
             </div>

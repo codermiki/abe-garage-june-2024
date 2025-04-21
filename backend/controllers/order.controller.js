@@ -36,8 +36,27 @@ const getAllOrdersOfCustomer = async (req, res) => {
    }
 };
 
+// Create all orders controller
+const getAllOrders = async (req, res) => {
+   try {
+      const orders = await orderService.getAllOrders();
+      if (!orders) {
+         return res.status(400).json({
+            error: "Failed to get all orders!",
+         });
+      }
+      res.status(200).json({
+         status: "success",
+         data: orders,
+      });
+   } catch (error) {
+      res.status(500).json({ message: error.message });
+   }
+};
+
 // exports
 module.exports = {
    addOrder,
    getAllOrdersOfCustomer,
+   getAllOrders,
 };

@@ -25,12 +25,12 @@ router.get(
    orderController.getAllOrdersOfCustomer
 );
 
-// // Create a route to handle the get all orders request on get
-// router.get(
-//    "/api/orders",
-//    [authMiddleware.verifyToken],
-//    orderController.getAllOrders
-// );
+// Create a route to handle the get all orders request on get
+router.get(
+   "/api/orders",
+   [authMiddleware.verifyToken],
+   orderController.getAllOrders
+);
 
 // // Create a route to handle the get order by id request on get
 // router.get(

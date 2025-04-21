@@ -24,6 +24,28 @@ const addOrder = async (orderData, loggedInEmployeeToken) => {
    }
 };
 
+// Function to get all orders
+const getAllOrders = async (loggedInEmployeeToken) => {
+   try {
+      const response = await fetch(`${api_url}/api/orders`, {
+         method: "GET",
+         headers: {
+            "Content-Type": "application/json",
+            "x-access-token": loggedInEmployeeToken,
+         },
+      });
+
+      if (!response.ok) {
+         throw new Error("Failed to fetch orders");
+      }
+
+      return response;
+   } catch (error) {
+      console.error("Error fetching orders:", error);
+      throw error;
+   }
+};
+
 // Function to get a single order by ID
 const getOrderById = async (orderId, loggedInEmployeeToken) => {
    try {
@@ -97,6 +119,7 @@ const getOrdersByCustomerId = async (customerId, loggedInEmployeeToken) => {
 // Export the functions as part of the orderService object
 const orderService = {
    addOrder,
+   getAllOrders,
    getOrderById,
    updateOrder,
    getOrdersByCustomerId,

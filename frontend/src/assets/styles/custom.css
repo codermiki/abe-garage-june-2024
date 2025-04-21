@@ -308,3 +308,15 @@ input:disabled {
    height: 18px;
    cursor: pointer;
 }
+
+#in_progress {
+   background-color: orange;
+   padding: 0 5px;
+   border-radius: 10px;
+}
+#completed {
+   background-color: green;
+   color: #fff;
+   padding: 0 5px;
+   border-radius: 10px;
+}

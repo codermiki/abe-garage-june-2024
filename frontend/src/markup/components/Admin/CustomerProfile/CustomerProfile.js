@@ -234,18 +234,27 @@ function CustomerProfile() {
                   <h4 className="fw-bold mt-4">
                      Orders of {customer[0]?.customer_first_name}
                   </h4>
-                  {!orderList?.length == 0 ? (
+                  {orderList?.length > 0 ? (
                      orderList.map((order) => (
                         <div
-                           key={order.id}
+                           key={order.order_id}
                            className="bg-white shadow-sm p-3 mb-3 rounded"
                         >
                            <div className="d-flex justify-content-between align-items-center">
                               <div className="d-flex flex-column">
-                                 <h5 className="fw-bold">{order.date}</h5>
-                                 <p className="text-muted">{order.status}</p>
+                                 <h5 className="fw-bold">
+                                    {/* change time format */}
+                                    {new Date(
+                                       order.order_date
+                                    ).toLocaleDateString("en-US", {
+                                       year: "numeric",
+                                       month: "2-digit",
+                                       day: "2-digit",
+                                    })}
+                                 </h5>
+                                 <p className="text-muted">{"inprogress"}</p>
                               </div>
-                              <p className="text-muted">{order.total}</p>
+                              <p className="text-muted">{"$1200"}</p>
                            </div>
                         </div>
                      ))

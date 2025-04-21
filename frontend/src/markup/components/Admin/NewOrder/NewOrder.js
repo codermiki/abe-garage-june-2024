@@ -9,12 +9,13 @@ import customerService from "../../../../services/customer.service";
 import vehicleService from "../../../../services/vehicle.service";
 // Import the useAuth hook
 import { useAuth } from "../../../../Contexts/AuthContext";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import serviceService from "../../../../services/service.service";
 import orderService from "../../../../services/order.service";
 
 function NewOrder() {
    const location = useLocation();
+   const navigate = useNavigate();
    const [searchQuery, setSearchQuery] = useState("");
    const [searchResults, setSearchResults] = useState([]);
    const [serverError, setServerError] = useState("");
@@ -178,7 +179,7 @@ function NewOrder() {
                   setServerError("");
                   setIsLoading(false);
                   // Redirect to the order list page after successful submission
-                  window.location.href = "/admin/orders";
+                  navigate("/admin/orders", { replace: true });
                }
             });
          });
@@ -238,23 +239,6 @@ function NewOrder() {
       }
    }, [vehicleSelected]);
 
-   // useEffect(() => {
-   //    const orderData = {
-   //       employee_id: employee.employee_id,
-   //       customer_id: customer.customer_id,
-   //       vehicle_id: vehicle.vehicle_id,
-   //       order_service: selectedServices.map((service_id) => {
-   //          return {
-   //             service_id: service_id,
-   //          };
-   //       }),
-   //       order_total_price: order_total_price,
-   //       order_description: additional_request,
-   //    };
-   //    console.log(selectedServices);
-   //    console.log(orderData);
-   // }, [selectedServices]);
-
    return (
       <section className="contact-section">
          <div className="auto-container">
@@ -275,7 +259,6 @@ function NewOrder() {
                                        value={searchQuery}
                                        onChange={(event) => {
                                           setSearchQuery(event.target.value);
-                                          return handleSearch(event);
                                        }}
                                        className="col-md-11"
                                        placeholder="Search by email, name, or phone"
@@ -744,26 +727,3 @@ function NewOrder() {
 }
 
 export default NewOrder;
-
-{
-   /* choice service */
-}
-{
-   /* <div className="card col-md-11 m-3 p-3 position-relative">
-   <div className="card-body">
-      <h5 className="card-title">Choice Service</h5>
-      <p className="card-text">Service info</p>
-   </div>
-   <FaWindowClose
-      size={20}
-      style={{
-         cursor: "pointer",
-         color: "red",
-         position: "absolute",
-         top: "10px",
-         right: "10px",
-      }}
-      onClick={() => setCustomerSelected((prev) => !prev)}
-   />
-</div> */
-}

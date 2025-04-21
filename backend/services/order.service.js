@@ -30,6 +30,9 @@ const addOrder = async (orderData) => {
             conn.query(sql2, serviceValue);
          });
 
+         const sql3 = `INSERT INTO order_status (order_id,order_status) VALUES (?, ?)`;
+         await conn.query(sql3, [orderId, 0]);
+
          return true;
       }
    } catch (error) {
@@ -52,8 +55,47 @@ const getAllOrdersOfCustomer = async (customerId) => {
    }
 };
 
+// A function to get all orders
+const getAllOrders = async () => {
+   try {
+      const sql = `SELECT 
+      o.order_id,
+      o.order_date,
+      e.employee_first_name,
+      e.employee_last_name,
+      s.order_status,
+
+      ci.customer_id,
+      ci.customer_first_name,
+      ci.customer_last_name,
+      cid.customer_email,
+      cid.customer_phone_number,
+
+      v.vehicle_id,
+      v.vehicle_make,
+      v.vehicle_model,
+      v.vehicle_year,
+      v.vehicle_serial
+
+    FROM orders o
+    JOIN customer_info ci ON o.customer_id = ci.customer_id
+    JOIN customer_identifier cid ON ci.customer_id = cid.customer_id
+    JOIN customer_vehicle_info v ON o.vehicle_id = v.vehicle_id
+    JOIN employee_info e ON o.employee_id = e.employee_id
+    JOIN order_status s ON o.order_id = s.order_id
+    ORDER BY o.order_id DESC`;
+
+      const rows = await conn.query(sql);
+      return rows;
+   } catch (error) {
+      console.error("Error fetching orders:", error);
+      return false;
+   }
+};
+
 // exports
 module.exports = {
    addOrder,
    getAllOrdersOfCustomer,
+   getAllOrders,
 };
