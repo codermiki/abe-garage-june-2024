@@ -13,6 +13,7 @@ function ServiceList() {
    const [fetching, setFetching] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
    const [updatingId, setUpdatingId] = useState("");
+   const [currentPage, setCurrentPage] = useState(1);
 
    let loggedInEmployeeToken = "";
    const { employee } = useAuth();
@@ -86,6 +87,9 @@ function ServiceList() {
                const res = await response.json();
                if (res.status === "success") {
                   setFetching((prev) => !prev);
+                  if (currentServices.length === 1) {
+                     setCurrentPage((prev) => prev - 1);
+                  }
                   setServerError("Service deleted successfully.");
                   const element = document.getElementById(
                      services[services.length - 2]?.service_id
@@ -135,6 +139,30 @@ function ServiceList() {
       fetchServices();
    }, [fetching]);
 
+   const servicePerPage = 5; // Number of customers to display per page
+   const indexOfLastService = currentPage * servicePerPage; // Index of the last customer on the current page
+   const indexOfFirstService = indexOfLastService - servicePerPage; // Index of the first customer on the current page
+   const currentServices = services.slice(
+      indexOfFirstService,
+      indexOfLastService
+   ); // Current customers to display
+
+   const totalPages = Math.ceil(services.length / servicePerPage); // Total number of pages
+
+   // handle next page
+   const handleNext = () => {
+      if (currentPage < totalPages) {
+         setCurrentPage(currentPage + 1);
+      }
+   };
+
+   // handle previous page
+   const handlePrev = () => {
+      if (currentPage > 1) {
+         setCurrentPage(currentPage - 1);
+      }
+   };
+
    return (
       <div>
          <section className="services-section">
@@ -150,7 +178,7 @@ function ServiceList() {
                </div>
 
                <div className="row">
-                  {services?.map((service, index) => (
+                  {currentServices?.map((service, index) => (
                      <>
                         <div
                            key={service?.service_id || index}
@@ -212,6 +240,44 @@ function ServiceList() {
                      </>
                   ))}
                </div>
+
+               {totalPages > 1 && (
+                  <>
+                     <nav>
+                        <ul className="pagination justify-content-center">
+                           <li
+                              className={`page-item ${
+                                 currentPage === 1 && "disabled"
+                              }`}
+                           >
+                              <button
+                                 className="page-link"
+                                 onClick={handlePrev}
+                              >
+                                 Previous
+                              </button>
+                           </li>
+                           <li className="page-item disabled">
+                              <span className="page-link">
+                                 Page {currentPage} of {totalPages}
+                              </span>
+                           </li>
+                           <li
+                              className={`page-item ${
+                                 currentPage === totalPages && "disabled"
+                              }`}
+                           >
+                              <button
+                                 className="page-link"
+                                 onClick={handleNext}
+                              >
+                                 Next
+                              </button>
+                           </li>
+                        </ul>
+                     </nav>
+                  </>
+               )}
 
                {serverError && (
                   <div

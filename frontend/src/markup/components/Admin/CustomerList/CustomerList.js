@@ -22,7 +22,31 @@ const CustomersList = () => {
    const [displayData, setDisplayData] = useState(customers);
    const [searchResults, setSearchResults] = useState([]);
    const [serverError, setServerError] = useState(null);
+   const [currentPage, setCurrentPage] = useState(1);
 
+   const customerPerPage = 5; // Number of customers to display per page
+   const indexOfLastCustomer = currentPage * customerPerPage; // Index of the last customer on the current page
+   const indexOfFirstCustomer = indexOfLastCustomer - customerPerPage; // Index of the first customer on the current page
+   const currentCustomers = displayData.slice(
+      indexOfFirstCustomer,
+      indexOfLastCustomer
+   );
+
+   const totalPages = Math.ceil(displayData.length / customerPerPage); // Total number of pages
+
+   // handle next page
+   const handleNext = () => {
+      if (currentPage < totalPages) {
+         setCurrentPage(currentPage + 1);
+      }
+   };
+
+   // handle previous page
+   const handlePrev = () => {
+      if (currentPage > 1) {
+         setCurrentPage(currentPage - 1);
+      }
+   };
    // Get the logged-in employee token
    const { employee } = useAuth();
    const token = employee?.employee_token;
@@ -118,8 +142,8 @@ const CustomersList = () => {
             </section>
          ) : (
             <section className="contact-section">
-               <div className="auto-container">
-                  <div className="contact-title">
+               <div className="auto-container p-0 m-0">
+                  <div className="contact-title p-0 m-0">
                      <h2>Customers</h2>
                   </div>
                   <form onSubmit={handleSearch}>
@@ -167,8 +191,8 @@ const CustomersList = () => {
                         </tr>
                      </thead>
                      <tbody>
-                        {displayData?.length > 0 ? (
-                           displayData?.map((customer) => (
+                        {currentCustomers?.length > 0 ? (
+                           currentCustomers?.map((customer) => (
                               <tr key={customer?.customer_id}>
                                  <td>{customer?.customer_id}</td>
                                  <td>{customer?.customer_first_name}</td>
@@ -213,6 +237,43 @@ const CustomersList = () => {
                         )}
                      </tbody>
                   </Table>
+                  {totalPages > 1 && (
+                     <>
+                        <nav>
+                           <ul className="pagination justify-content-center">
+                              <li
+                                 className={`page-item ${
+                                    currentPage === 1 && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handlePrev}
+                                 >
+                                    Previous
+                                 </button>
+                              </li>
+                              <li className="page-item disabled">
+                                 <span className="page-link">
+                                    Page {currentPage} of {totalPages}
+                                 </span>
+                              </li>
+                              <li
+                                 className={`page-item ${
+                                    currentPage === totalPages && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handleNext}
+                                 >
+                                    Next
+                                 </button>
+                              </li>
+                           </ul>
+                        </nav>
+                     </>
+                  )}
                </div>
             </section>
          )}

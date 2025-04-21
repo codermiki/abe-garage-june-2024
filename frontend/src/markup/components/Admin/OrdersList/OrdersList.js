@@ -13,6 +13,8 @@ const OrdersList = () => {
    const [orders, setOrders] = useState([]);
    const [apiError, setApiError] = useState(false);
    const [apiErrorMessage, setApiErrorMessage] = useState(null);
+   const [currentPage, setCurrentPage] = useState(1);
+
    const { employee } = useAuth();
    let token = employee ? employee.employee_token : null;
 
@@ -57,10 +59,6 @@ const OrdersList = () => {
             .catch(() => alert("Error deleting order"));
       }
    };
-
-   useEffect(() => {
-      console.log(orders);
-   }, [orders]);
 
    // sample data for testing
    const ordersData = [
@@ -138,6 +136,27 @@ const OrdersList = () => {
       },
    ];
 
+   const orderPerPage = 5; // Number of customers to display per page
+   const indexOfLastOrder = currentPage * orderPerPage; // Index of the last customer on the current page
+   const indexOfFirstOrder = indexOfLastOrder - orderPerPage; // Index of the first customer on the current page
+   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+   const totalPages = Math.ceil(orders.length / orderPerPage); // Total number of pages
+
+   // handle next page
+   const handleNext = () => {
+      if (currentPage < totalPages) {
+         setCurrentPage(currentPage + 1);
+      }
+   };
+
+   // handle previous page
+   const handlePrev = () => {
+      if (currentPage > 1) {
+         setCurrentPage(currentPage - 1);
+      }
+   };
+
    return (
       <>
          {apiError ? (
@@ -168,7 +187,7 @@ const OrdersList = () => {
                         </tr>
                      </thead>
                      <tbody>
-                        {orders?.map((order) => (
+                        {currentOrders?.map((order) => (
                            <tr key={order.order_id}>
                               <td>{order.order_id}</td>
                               <td>
@@ -232,6 +251,43 @@ const OrdersList = () => {
                         ))}
                      </tbody>
                   </Table>
+                  {totalPages > 1 && (
+                     <>
+                        <nav>
+                           <ul className="pagination justify-content-center">
+                              <li
+                                 className={`page-item ${
+                                    currentPage === 1 && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handlePrev}
+                                 >
+                                    Previous
+                                 </button>
+                              </li>
+                              <li className="page-item disabled">
+                                 <span className="page-link">
+                                    Page {currentPage} of {totalPages}
+                                 </span>
+                              </li>
+                              <li
+                                 className={`page-item ${
+                                    currentPage === totalPages && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handleNext}
+                                 >
+                                    Next
+                                 </button>
+                              </li>
+                           </ul>
+                        </nav>
+                     </>
+                  )}
                </div>
             </section>
          )}

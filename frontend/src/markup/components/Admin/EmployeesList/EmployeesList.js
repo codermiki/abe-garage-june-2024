@@ -13,6 +13,8 @@ const EmployeesList = () => {
    const [employees, setEmployees] = useState([]);
    const [apiError, setApiError] = useState(false);
    const [apiErrorMessage, setApiErrorMessage] = useState(null);
+   const [currentPage, setCurrentPage] = useState(1);
+
    const { employee } = useAuth();
    let token = employee ? employee.employee_token : null;
 
@@ -58,6 +60,30 @@ const EmployeesList = () => {
       }
    };
 
+   const employeePerPage = 5; // Number of employees to display per page
+   const indexOfLastEmployee = currentPage * employeePerPage; // Index of the last employee on the current page
+   const indexOfFirstEmployee = indexOfLastEmployee - employeePerPage; // Index of the first employee on the current page
+   const currentEmployees = employees.slice(
+      indexOfFirstEmployee,
+      indexOfLastEmployee
+   );
+
+   const totalPages = Math.ceil(employees.length / employeePerPage); // Total number of pages
+
+   // handle next page
+   const handleNext = () => {
+      if (currentPage < totalPages) {
+         setCurrentPage(currentPage + 1);
+      }
+   };
+
+   // handle previous page
+   const handlePrev = () => {
+      if (currentPage > 1) {
+         setCurrentPage(currentPage - 1);
+      }
+   };
+
    return (
       <>
          {apiError ? (
@@ -70,8 +96,8 @@ const EmployeesList = () => {
             </section>
          ) : (
             <section className="contact-section">
-               <div className="auto-container">
-                  <div className="contact-title">
+               <div className="auto-container p-0 m-0">
+                  <div className="contact-title p-0 m-0">
                      <h2>Employees</h2>
                   </div>
                   {/* Employee List */}
@@ -89,7 +115,7 @@ const EmployeesList = () => {
                         </tr>
                      </thead>
                      <tbody>
-                        {employees.map((employee) => (
+                        {currentEmployees?.map((employee) => (
                            <tr key={employee.employee_id}>
                               <td>{employee.active_employee ? "Yes" : "No"}</td>
                               <td>{employee.employee_first_name}</td>
@@ -128,6 +154,43 @@ const EmployeesList = () => {
                         ))}
                      </tbody>
                   </Table>
+                  {totalPages > 1 && (
+                     <>
+                        <nav>
+                           <ul className="pagination justify-content-center">
+                              <li
+                                 className={`page-item ${
+                                    currentPage === 1 && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handlePrev}
+                                 >
+                                    Previous
+                                 </button>
+                              </li>
+                              <li className="page-item disabled">
+                                 <span className="page-link">
+                                    Page {currentPage} of {totalPages}
+                                 </span>
+                              </li>
+                              <li
+                                 className={`page-item ${
+                                    currentPage === totalPages && "disabled"
+                                 }`}
+                              >
+                                 <button
+                                    className="page-link"
+                                    onClick={handleNext}
+                                 >
+                                    Next
+                                 </button>
+                              </li>
+                           </ul>
+                        </nav>
+                     </>
+                  )}
                </div>
             </section>
          )}
