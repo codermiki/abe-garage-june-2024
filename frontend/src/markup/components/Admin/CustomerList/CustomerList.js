@@ -9,7 +9,7 @@ import { format } from "date-fns"; // To properly format the date on the table
 // Import the customer service
 import customerService from "../../../../services/customer.service";
 import { Link, useLocation } from "react-router-dom";
-import { LuPointer } from "react-icons/lu";
+import { ClipLoader } from "react-spinners";
 
 // Create the CustomersList component
 const CustomersList = () => {
@@ -23,6 +23,7 @@ const CustomersList = () => {
    const [searchResults, setSearchResults] = useState([]);
    const [serverError, setServerError] = useState(null);
    const [currentPage, setCurrentPage] = useState(1);
+   const [loading, setLoading] = useState(false);
 
    const customerPerPage = 5; // Number of customers to display per page
    const indexOfLastCustomer = currentPage * customerPerPage; // Index of the last customer on the current page
@@ -53,10 +54,12 @@ const CustomersList = () => {
 
    useEffect(() => {
       if (token) {
+         setLoading(true); // Set loading to true when fetching data
          customerService
             .getAllCustomers(token)
             .then((res) => {
                if (!res.ok) {
+                  setLoading(false); // Set loading to false if there is an error
                   setApiError(true);
                   setApiErrorMessage(
                      res.status === 401
@@ -72,13 +75,16 @@ const CustomersList = () => {
             .then((res) => res.data) // Extract data from the response
             .then((data) => {
                if (data?.customers?.length) {
+                  setLoading(false); // Set loading to false after data is fetched
                   setCustomers(data.customers);
                   setDisplayData(data.customers); // Set the initial display data to all customers
                } else {
+                  setLoading(false); // Set loading to false if no customers are found
                   setCustomers([]); // Handle empty response properly
                }
             })
             .catch(() => {
+               setLoading(false); // Set loading to false if there is an error
                setApiError(true);
                setApiErrorMessage(
                   "An error occurred while fetching customers."
@@ -89,8 +95,11 @@ const CustomersList = () => {
 
    const handleSearch = (e) => {
       e.preventDefault();
+      setLoading(true); // Set loading to true when searching
+      setCurrentPage(1); // Reset to the first page when searching
 
       if (!searchQuery) {
+         setLoading(false); // Set loading to false if search query is empty
          setDisplayData(customers);
          setServerError("Search query is required");
          return;
@@ -101,6 +110,7 @@ const CustomersList = () => {
          .then((response) => response.json())
          .then((data) => {
             if (data.error) {
+               setLoading(false); // Set loading to false if there is an error
                setDisplayData(customers);
                setServerError(data.error);
                setSearchResults([]);
@@ -117,6 +127,7 @@ const CustomersList = () => {
                if (element) {
                   element.scrollIntoView({ behavior: "smooth" });
                }
+               setLoading(false); // Set loading to false after search is complete
             }
          })
          .catch((error) => {
@@ -127,6 +138,7 @@ const CustomersList = () => {
                error.message ||
                error.toString();
             setServerError(resMessage);
+            setLoading(false); // Set loading to false if there is an error
          });
    };
 
@@ -146,6 +158,7 @@ const CustomersList = () => {
                   <div className="contact-title p-0 m-0">
                      <h2>Customers</h2>
                   </div>
+
                   <form onSubmit={handleSearch}>
                      <div className="row clearfix">
                         <div className="form-group col-md-12 position-relative d-flex ">
@@ -177,66 +190,85 @@ const CustomersList = () => {
                         </div>
                      </div>
                   </form>
-                  <Table striped bordered hover>
-                     <thead>
-                        <tr>
-                           <th>ID</th>
-                           <th>First Name</th>
-                           <th>Last Name</th>
-                           <th>Email</th>
-                           <th>Phone</th>
-                           <th>Added Date</th>
-                           <th>Active</th>
-                           <th>Edit</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {currentCustomers?.length > 0 ? (
-                           currentCustomers?.map((customer) => (
-                              <tr key={customer?.customer_id}>
-                                 <td>{customer?.customer_id}</td>
-                                 <td>{customer?.customer_first_name}</td>
-                                 <td>{customer?.customer_last_name}</td>
-                                 <td>{customer?.customer_email}</td>
-                                 <td>{customer?.customer_phone_number}</td>
-                                 <td>
-                                    {format(
-                                       new Date(customer?.customer_added_date),
-                                       "MM - dd - yyyy | kk:mm"
-                                    )}
-                                 </td>
-                                 <td>
-                                    {customer?.active_customer_status
-                                       ? "Yes"
-                                       : "No"}
-                                 </td>
-                                 <td>
-                                    <div className="edit-delete-icons">
-                                       <Link
-                                          to={`/admin/customers/edit/${customer?.customer_id}`}
-                                          state={{ from: location.pathname }}
-                                       >
-                                          <FaEdit />
-                                       </Link>
 
-                                       <Link
-                                          to={`/admin/customers/profile/${customer?.customer_id}`}
-                                       >
-                                          <FaExternalLinkAlt />
-                                       </Link>
-                                    </div>
-                                 </td>
+                  {loading ? (
+                     <div className="text-center h-100 d-flex justify-content-center align-items-center">
+                        <ClipLoader
+                           color="#36d7b7"
+                           loading={loading}
+                           size={50}
+                        />
+                     </div>
+                  ) : (
+                     <>
+                        <Table striped bordered hover>
+                           <thead>
+                              <tr>
+                                 <th>ID</th>
+                                 <th>First Name</th>
+                                 <th>Last Name</th>
+                                 <th>Email</th>
+                                 <th>Phone</th>
+                                 <th>Added Date</th>
+                                 <th>Active</th>
+                                 <th>Edit</th>
                               </tr>
-                           ))
-                        ) : (
-                           <tr>
-                              <td colSpan="8" className="text-center">
-                                 No customers found.
-                              </td>
-                           </tr>
-                        )}
-                     </tbody>
-                  </Table>
+                           </thead>
+                           <tbody>
+                              {currentCustomers?.length > 0 ? (
+                                 currentCustomers?.map((customer) => (
+                                    <tr key={customer?.customer_id}>
+                                       <td>{customer?.customer_id}</td>
+                                       <td>{customer?.customer_first_name}</td>
+                                       <td>{customer?.customer_last_name}</td>
+                                       <td>{customer?.customer_email}</td>
+                                       <td>
+                                          {customer?.customer_phone_number}
+                                       </td>
+                                       <td>
+                                          {format(
+                                             new Date(
+                                                customer?.customer_added_date
+                                             ),
+                                             "MM - dd - yyyy | kk:mm"
+                                          )}
+                                       </td>
+                                       <td>
+                                          {customer?.active_customer_status
+                                             ? "Yes"
+                                             : "No"}
+                                       </td>
+                                       <td>
+                                          <div className="edit-delete-icons">
+                                             <Link
+                                                to={`/admin/customers/edit/${customer?.customer_id}`}
+                                                state={{
+                                                   from: location.pathname,
+                                                }}
+                                             >
+                                                <FaEdit />
+                                             </Link>
+
+                                             <Link
+                                                to={`/admin/customers/profile/${customer?.customer_id}`}
+                                             >
+                                                <FaExternalLinkAlt />
+                                             </Link>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 ))
+                              ) : (
+                                 <tr>
+                                    <td colSpan="8" className="text-center">
+                                       No customers found.
+                                    </td>
+                                 </tr>
+                              )}
+                           </tbody>
+                        </Table>
+                     </>
+                  )}
                   {totalPages > 1 && (
                      <>
                         <nav>

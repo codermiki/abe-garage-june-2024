@@ -4,9 +4,10 @@ import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Table, Button } from "react-bootstrap";
 import { useAuth } from "../../../../Contexts/AuthContext";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import employeeService from "../../../../services/employee.service";
 import { Link, useLocation } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 
 const EmployeesList = () => {
    const location = useLocation();
@@ -14,6 +15,7 @@ const EmployeesList = () => {
    const [apiError, setApiError] = useState(false);
    const [apiErrorMessage, setApiErrorMessage] = useState(null);
    const [currentPage, setCurrentPage] = useState(1);
+   const [loading, setLoading] = useState(false);
 
    const { employee } = useAuth();
    let token = employee ? employee.employee_token : null;
@@ -23,10 +25,12 @@ const EmployeesList = () => {
    }, []);
 
    const fetchEmployees = () => {
+      setLoading(true);
       employeeService
          .getAllEmployees(token)
          .then((res) => {
             if (!res.ok) {
+               setLoading(false);
                setApiError(true);
                setApiErrorMessage(
                   res.status === 401
@@ -41,9 +45,13 @@ const EmployeesList = () => {
          .then((data) => {
             if (data.data.length !== 0) {
                setEmployees(data.data);
+               setLoading(false);
             }
          })
-         .catch(() => setApiErrorMessage("Error fetching employees"));
+         .catch(() => {
+            setApiErrorMessage("Error fetching employees");
+            setLoading(false);
+         });
    };
 
    const handleDelete = (id) => {
@@ -101,59 +109,75 @@ const EmployeesList = () => {
                      <h2>Employees</h2>
                   </div>
                   {/* Employee List */}
-                  <Table striped bordered hover>
-                     <thead>
-                        <tr>
-                           <th>Active</th>
-                           <th>First Name</th>
-                           <th>Last Name</th>
-                           <th>Email</th>
-                           <th>Phone</th>
-                           <th>Added Date</th>
-                           <th>Role</th>
-                           <th>Edit/Delete</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {currentEmployees?.map((employee) => (
-                           <tr key={employee.employee_id}>
-                              <td>{employee.active_employee ? "Yes" : "No"}</td>
-                              <td>{employee.employee_first_name}</td>
-                              <td>{employee.employee_last_name}</td>
-                              <td>{employee.employee_email}</td>
-                              <td>{employee.employee_phone}</td>
-                              <td>
-                                 {format(
-                                    new Date(employee.added_date),
-                                    "MM-dd-yyyy | HH:mm"
-                                 )}
-                              </td>
-                              <td>{employee.company_role_name}</td>
-                              <td>
-                                 <div className="edit-delete-icons">
-                                    <Link
-                                       to={`/admin/employees/edit/${employee.employee_id}`}
-                                       state={{ from: location.pathname }}
-                                       className="m-2"
-                                    >
-                                       <FaEdit />
-                                    </Link>
+                  {loading ? (
+                     <div className="text-center h-100 d-flex justify-content-center align-items-center">
+                        <ClipLoader
+                           color="#36d7b7"
+                           loading={loading}
+                           size={50}
+                        />
+                     </div>
+                  ) : (
+                     <>
+                        <Table striped bordered hover>
+                           <thead>
+                              <tr>
+                                 <th>Active</th>
+                                 <th>First Name</th>
+                                 <th>Last Name</th>
+                                 <th>Email</th>
+                                 <th>Phone</th>
+                                 <th>Added Date</th>
+                                 <th>Role</th>
+                                 <th>Edit/Delete</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              {currentEmployees?.map((employee) => (
+                                 <tr key={employee.employee_id}>
+                                    <td>
+                                       {employee.active_employee ? "Yes" : "No"}
+                                    </td>
+                                    <td>{employee.employee_first_name}</td>
+                                    <td>{employee.employee_last_name}</td>
+                                    <td>{employee.employee_email}</td>
+                                    <td>{employee.employee_phone}</td>
+                                    <td>
+                                       {format(
+                                          new Date(employee.added_date),
+                                          "MM-dd-yyyy | HH:mm"
+                                       )}
+                                    </td>
+                                    <td>{employee.company_role_name}</td>
+                                    <td>
+                                       <div className="edit-delete-icons">
+                                          <Link
+                                             to={`/admin/employees/edit/${employee.employee_id}`}
+                                             state={{ from: location.pathname }}
+                                             className="m-2"
+                                          >
+                                             <FaEdit />
+                                          </Link>
 
-                                    <Button
-                                       variant="danger"
-                                       size="sm"
-                                       onClick={() =>
-                                          handleDelete(employee.employee_id)
-                                       }
-                                    >
-                                       <MdDelete />
-                                    </Button>
-                                 </div>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </Table>
+                                          <Button
+                                             variant="danger"
+                                             size="sm"
+                                             onClick={() =>
+                                                handleDelete(
+                                                   employee.employee_id
+                                                )
+                                             }
+                                          >
+                                             <MdDelete />
+                                          </Button>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </Table>
+                     </>
+                  )}
                   {totalPages > 1 && (
                      <>
                         <nav>

@@ -4,6 +4,7 @@ import { MdDelete } from "react-icons/md";
 import serviceService from "../../../../services/service.service";
 import { useAuth } from "../../../../Contexts/AuthContext";
 import EditServiceForm from "../EditServiceForm/EditServiceForm";
+import { ClipLoader } from "react-spinners";
 
 function ServiceList() {
    const [services, setServices] = useState([]);
@@ -14,6 +15,7 @@ function ServiceList() {
    const [isLoading, setIsLoading] = useState(false);
    const [updatingId, setUpdatingId] = useState("");
    const [currentPage, setCurrentPage] = useState(1);
+   const [loading, setLoading] = useState(false);
 
    let loggedInEmployeeToken = "";
    const { employee } = useAuth();
@@ -115,6 +117,7 @@ function ServiceList() {
 
    useEffect(() => {
       const fetchServices = async () => {
+         setLoading(true);
          try {
             const response = await serviceService.getAllServices(
                loggedInEmployeeToken
@@ -123,16 +126,20 @@ function ServiceList() {
                const res = await response.json();
                const { status, data } = res;
                if (status !== "success") {
+                  setLoading(false);
                   setServerError("Failed to fetch services.");
                   return;
                }
 
                setServices(data);
+               setLoading(false);
             } else {
+               setLoading(false);
                setServerError("Failed to fetch services.");
             }
          } catch (error) {
             setServerError("Failed to fetch services. Please try again.");
+            setLoading(false);
          }
       };
 
@@ -177,68 +184,80 @@ function ServiceList() {
                   </div>
                </div>
 
-               <div className="row">
-                  {currentServices?.map((service, index) => (
-                     <>
-                        <div
-                           key={service?.service_id || index}
-                           className="col-lg-12 service-block-one"
-                           id={`${service?.service_id}`}
-                        >
+               <div className="row w-100">
+                  {loading ? (
+                     <div className="mx-auto">
+                        <ClipLoader
+                           color="#36d7b7"
+                           loading={loading}
+                           size={50}
+                        />
+                     </div>
+                  ) : (
+                     currentServices?.map((service, index) => (
+                        <>
                            <div
-                              style={{
-                                 padding: "20px",
-                                 position: "relative",
-                              }}
-                              className="inner-box hvr-float-shadow"
+                              key={service?.service_id || index}
+                              className="col-lg-12 service-block-one"
+                              id={`${service?.service_id}`}
                            >
-                              <h5>{service?.service_name}</h5>
-                              <p>{service?.service_description}</p>
-                              <div className="icon edit-delete-icons">
-                                 <a
-                                    href=""
-                                    onClick={(e) => {
-                                       e.preventDefault();
-                                       e.stopPropagation();
-                                       setUpdatingId(service?.service_id);
-                                    }}
-                                 >
-                                    {updatingId != service?.service_id ? (
-                                       <FaEdit size={20} />
-                                    ) : (
-                                       ""
-                                    )}
-                                 </a>
-                                 <a
-                                    href=""
-                                    onClick={(e) => {
-                                       e.preventDefault();
-                                       e.stopPropagation();
-                                       return handleDelete(service?.service_id);
-                                    }}
-                                    style={{
-                                       background: "none",
-                                       border: "none",
-                                       cursor: "pointer",
-                                    }}
-                                 >
-                                    <MdDelete size={20} />
-                                 </a>
+                              <div
+                                 style={{
+                                    padding: "20px",
+                                    position: "relative",
+                                 }}
+                                 className="inner-box hvr-float-shadow"
+                              >
+                                 <h5>{service?.service_name}</h5>
+                                 <p>{service?.service_description}</p>
+                                 <div className="icon edit-delete-icons">
+                                    <a
+                                       href=""
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setUpdatingId(service?.service_id);
+                                       }}
+                                    >
+                                       {updatingId != service?.service_id ? (
+                                          <FaEdit size={20} />
+                                       ) : (
+                                          ""
+                                       )}
+                                    </a>
+                                    <a
+                                       href=""
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          return handleDelete(
+                                             service?.service_id
+                                          );
+                                       }}
+                                       style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                       }}
+                                    >
+                                       <MdDelete size={20} />
+                                    </a>
+                                 </div>
+                                 {updatingId == service?.service_id ? (
+                                    <EditServiceForm
+                                       id={service?.service_id}
+                                       setFetching={setFetching}
+                                       setUpdatingId={setUpdatingId}
+                                       prop_serviceData={service}
+                                    />
+                                 ) : (
+                                    ""
+                                 )}
                               </div>
-                              {updatingId == service?.service_id ? (
-                                 <EditServiceForm
-                                    id={service?.service_id}
-                                    setFetching={setFetching}
-                                    setUpdatingId={setUpdatingId}
-                                    prop_serviceData={service}
-                                 />
-                              ) : (
-                                 ""
-                              )}
                            </div>
-                        </div>
-                     </>
-                  ))}
+                        </>
+                     ))
+                  )}
                </div>
 
                {totalPages > 1 && (

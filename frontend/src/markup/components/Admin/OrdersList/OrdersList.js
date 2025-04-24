@@ -7,6 +7,8 @@ import { useAuth } from "../../../../Contexts/AuthContext";
 import { format } from "date-fns";
 import orderService from "../../../../services/order.service";
 import { Link, useLocation } from "react-router-dom";
+// import react loading effect
+import { ClipLoader } from "react-spinners";
 
 const OrdersList = () => {
    const location = useLocation();
@@ -14,6 +16,9 @@ const OrdersList = () => {
    const [apiError, setApiError] = useState(false);
    const [apiErrorMessage, setApiErrorMessage] = useState(null);
    const [currentPage, setCurrentPage] = useState(1);
+
+   // add loading state
+   const [loading, setLoading] = useState(false);
 
    const { employee } = useAuth();
    let token = employee ? employee.employee_token : null;
@@ -23,10 +28,12 @@ const OrdersList = () => {
    }, []);
 
    const fetchOrders = () => {
+      setLoading(true);
       orderService
          .getAllOrders(token)
          .then((res) => {
             if (!res.ok) {
+               setLoading(false);
                setApiError(true);
                setApiErrorMessage(
                   res.status === 401
@@ -41,9 +48,13 @@ const OrdersList = () => {
          .then((data) => {
             if (data.data.length !== 0) {
                setOrders(data.data);
+               setLoading(false);
             }
          })
-         .catch(() => setApiErrorMessage("Error fetching orders"));
+         .catch(() => {
+            setApiErrorMessage("Error fetching orders");
+            setLoading(false);
+         });
    };
 
    const handleDelete = (id) => {
@@ -59,82 +70,6 @@ const OrdersList = () => {
             .catch(() => alert("Error deleting order"));
       }
    };
-
-   // sample data for testing
-   const ordersData = [
-      {
-         order_id: 1,
-         customer: [
-            {
-               customer_id: 1,
-               customer_first_name: "John",
-               customer_last_name: "Doe",
-               customer_email: "example@gmail.com",
-               customer_phone: "123-456-7890",
-            },
-         ],
-         vehicle: [
-            {
-               vehicle_id: 1,
-               vehicle_make: "Toyota",
-               vehicle_model: "Camry",
-               vehicle_year: 2020,
-               vehicle_serial_number: "1234567890",
-            },
-         ],
-         order_date: "2023-10-01T12:00:00Z",
-         received_by: "Jane Smith",
-         status: "Completed",
-      },
-      {
-         order_id: 2,
-         customer: [
-            {
-               customer_id: 1,
-               customer_first_name: "John",
-               customer_last_name: "Doe",
-               customer_email: "example@gmail.com",
-               customer_phone: "123-456-7890",
-            },
-         ],
-         vehicle: [
-            {
-               vehicle_id: 1,
-               vehicle_make: "Toyota",
-               vehicle_model: "Camry",
-               vehicle_year: 2020,
-               vehicle_serial_number: "1234567890",
-            },
-         ],
-         order_date: "2023-10-01T12:00:00Z",
-         received_by: "Jane Smith",
-         status: "Completed",
-      },
-      {
-         order_id: 3,
-         customer: [
-            {
-               customer_id: 1,
-               customer_first_name: "John",
-               customer_last_name: "Doe",
-               customer_email: "example@gmail.com",
-               customer_phone: "123-456-7890",
-            },
-         ],
-         vehicle: [
-            {
-               vehicle_id: 1,
-               vehicle_make: "Toyota",
-               vehicle_model: "Camry",
-               vehicle_year: 2020,
-               vehicle_serial_number: "1234567890",
-            },
-         ],
-         order_date: "2023-10-01T12:00:00Z",
-         received_by: "Jane Smith",
-         status: "Completed",
-      },
-   ];
 
    const orderPerPage = 5; // Number of customers to display per page
    const indexOfLastOrder = currentPage * orderPerPage; // Index of the last customer on the current page
@@ -174,83 +109,99 @@ const OrdersList = () => {
                      <h2>Orders</h2>
                   </div>
                   {/* Orders List */}
-                  <Table striped bordered hover>
-                     <thead>
-                        <tr>
-                           <th>Order ID</th>
-                           <th>Customer</th>
-                           <th>Vehicle</th>
-                           <th>Order Date</th>
-                           <th>Received By</th>
-                           <th>Order Status</th>
-                           <th>Edit/View</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {currentOrders?.map((order) => (
-                           <tr key={order.order_id}>
-                              <td>{order.order_id}</td>
-                              <td>
-                                 <div key={order.customer_id}>
-                                    {order.customer_first_name}{" "}
-                                    {order.customer_last_name}
-                                    <br />
-                                    {order.customer_email}
-                                    <br />
-                                    {order.customer_phone_number}
-                                 </div>
-                              </td>
-                              <td>
-                                 <div key={order.vehicle_id}>
-                                    {order.vehicle_make} {order.vehicle_model}{" "}
-                                    <br />
-                                    {order.vehicle_year}
-                                    <br />
-                                    {order.vehicle_serial}
-                                 </div>
-                              </td>
-                              <td>
-                                 {format(
-                                    new Date(order.order_date),
-                                    "MM-dd-yyyy | HH:mm"
-                                 )}
-                              </td>
-                              <td>
-                                 {order.employee_first_name}{" "}
-                                 {order.employee_last_name}
-                              </td>
-                              <td>
-                                 {order.order_status ? (
-                                    <>
-                                       <span id="completed">Completed</span>
-                                    </>
-                                 ) : (
-                                    <>
-                                       <span id="in_progress">In progress</span>
-                                    </>
-                                 )}
-                              </td>
-                              <td>
-                                 <div className="edit-delete-icons">
-                                    <Link
-                                       to={`/admin/orders/edit/${order.order_id}`}
-                                       state={{ from: location.pathname }}
-                                       className="m-2"
-                                    >
-                                       <FaEdit />
-                                    </Link>
+                  {loading ? (
+                     <div className="text-center h-100 d-flex justify-content-center align-items-center">
+                        <ClipLoader
+                           color="#36d7b7"
+                           loading={loading}
+                           size={50}
+                        />
+                     </div>
+                  ) : (
+                     <>
+                        <Table striped bordered hover>
+                           <thead>
+                              <tr>
+                                 <th>Order ID</th>
+                                 <th>Customer</th>
+                                 <th>Vehicle</th>
+                                 <th>Order Date</th>
+                                 <th>Received By</th>
+                                 <th>Order Status</th>
+                                 <th>Edit/View</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              {currentOrders?.map((order) => (
+                                 <tr key={order.order_id}>
+                                    <td>{order.order_id}</td>
+                                    <td>
+                                       <div key={order.customer_id}>
+                                          {order.customer_first_name}{" "}
+                                          {order.customer_last_name}
+                                          <br />
+                                          {order.customer_email}
+                                          <br />
+                                          {order.customer_phone_number}
+                                       </div>
+                                    </td>
+                                    <td>
+                                       <div key={order.vehicle_id}>
+                                          {order.vehicle_make}{" "}
+                                          {order.vehicle_model} <br />
+                                          {order.vehicle_year}
+                                          <br />
+                                          {order.vehicle_serial}
+                                       </div>
+                                    </td>
+                                    <td>
+                                       {format(
+                                          new Date(order.order_date),
+                                          "MM-dd-yyyy | HH:mm"
+                                       )}
+                                    </td>
+                                    <td>
+                                       {order.employee_first_name}{" "}
+                                       {order.employee_last_name}
+                                    </td>
+                                    <td>
+                                       {order.order_status ? (
+                                          <>
+                                             <span id="completed">
+                                                Completed
+                                             </span>
+                                          </>
+                                       ) : (
+                                          <>
+                                             <span id="in_progress">
+                                                In progress
+                                             </span>
+                                          </>
+                                       )}
+                                    </td>
+                                    <td>
+                                       <div className="edit-delete-icons">
+                                          <Link
+                                             to={`/admin/orders/edit/${order.order_id}`}
+                                             state={{ from: location.pathname }}
+                                             className="m-2"
+                                          >
+                                             <FaEdit />
+                                          </Link>
 
-                                    <Link
-                                       to={`/admin/orders/${order.order_id}`}
-                                    >
-                                       <FaExternalLinkAlt />
-                                    </Link>
-                                 </div>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </Table>
+                                          <Link
+                                             to={`/admin/orders/${order.order_id}`}
+                                          >
+                                             <FaExternalLinkAlt />
+                                          </Link>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </Table>
+                     </>
+                  )}
                   {totalPages > 1 && (
                      <>
                         <nav>
